@@ -1,5 +1,5 @@
 import streamlit as st
-from tabs import home, dados, dashboard, docs
+from presentation import home, dados, account, dashboard, docs
 
 def main():
     st.set_page_config(page_title='Dashboard de controle Financeiro',
@@ -7,7 +7,7 @@ def main():
                     layout='wide')
     
     st.title('Dashboard de controle Financeiro')
-    tab1, tab2, tab3, tab4 = st.tabs(['Home', 'Dados', 'Dashboard', 'Documentação'])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(['Home', 'Dados', 'Dashboard', 'Contas', 'Documentação'])
 
     with st.sidebar:
         st.header('Filters')
@@ -22,6 +22,9 @@ def main():
 
     with tab2:
         dados.show()
+
+    with tab4:
+        account.show()
 
 
 if __name__ == '__main__':
