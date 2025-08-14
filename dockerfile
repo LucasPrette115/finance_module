@@ -2,13 +2,13 @@ FROM python:3.13-slim
 
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /main
 
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app
+COPY . /main
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "app/main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "main/main.py", "--server.port=8501", "--server.address=0.0.0.0"]

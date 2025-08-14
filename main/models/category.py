@@ -1,9 +1,8 @@
 import uuid
 from sqlalchemy import Column, String, Date, Numeric, ForeignKey, Text, DateTime, func, text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
+from infrastructure.db.session import Base
 
-Base = declarative_base()
 
 class Category(Base):
     __tablename__ = "categories"

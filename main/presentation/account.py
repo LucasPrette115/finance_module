@@ -17,7 +17,7 @@ def create_account(name, description):
         session.close()
 
 def show():
-    st.title("Cadastro de Account")
+    st.title("Cadastro de Conta")
 
     name = st.text_input("Nome")
     description = st.text_area("Descrição")
@@ -25,6 +25,6 @@ def show():
     if st.button("Cadastrar"):
         if name.strip():
             if create_account(name, description):
-                st.success("Account criada com sucesso!")
+                st.success("Conta criada com sucesso!")
         else:
             st.warning("O nome é obrigatório.")

@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 CREATE TABLE IF NOT EXISTS categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(150) NOT NULL,
-    type VARCHAR(20) NOT NULL,
-    parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+    type VARCHAR(20) NOT NULL, 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     UNIQUE (name, type)
@@ -28,17 +27,15 @@ CREATE TABLE IF NOT EXISTS transactions (
     credit NUMERIC(14,2) DEFAULT 0 NOT NULL,
     debit  NUMERIC(14,2) DEFAULT 0 NOT NULL,
     account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date);
 CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions (account_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category_id);
 
 INSERT INTO accounts (id, name, description)
-VALUES (gen_random_uuid(), 'Conta corrente Santander')
+VALUES (gen_random_uuid(), 'Santander', 'Conta corrente principal')
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO categories (id, name, type)

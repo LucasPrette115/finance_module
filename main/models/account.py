@@ -1,9 +1,8 @@
-import uuid
+
 from sqlalchemy import Column, String, Date, Numeric, ForeignKey, Text, DateTime, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from infrastructure.db.session import Base, SessionLocal
 
 class Account(Base):
     __tablename__ = "accounts"
@@ -12,3 +11,10 @@ class Account(Base):
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+def get__all_accounts():
+    session = SessionLocal()
+    try:
+        return session.query(Account).all()          
+    finally:
+        session.close()

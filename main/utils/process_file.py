@@ -50,13 +50,10 @@ def process_financial_data(file):
     df['Saldo (R$)'] = pd.to_numeric(df['Saldo (R$)'], errors='coerce').fillna(0)
     df['Crédito (R$)'] = pd.to_numeric(df['Crédito (R$)'], errors='coerce').fillna(0)
     df['Débito (R$)'] = pd.to_numeric(df['Débito (R$)'], errors='coerce').fillna(0)
-
-    previous_balance_series = df.loc[df['Descrição'].str.strip() == 'SALDO ANTERIOR', 'Saldo (R$)']
-
-    if not previous_balance_series.empty:
-        previous_balance = previous_balance_series.iloc[0]
-    else:
-        previous_balance = 0
-
+    df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
+    df['Descrição'] = df['Descrição'].str.strip()
+    df['Docto'] = df['Docto'].str.strip()
+    df['Situação'] = df['Situação'].str.strip()
+    
     return df       
     
