@@ -1,5 +1,5 @@
 import streamlit as st
-from models.account import get__all_accounts
+from models.account import get_all_accounts
 from presentation import home, dados, account, dashboard, docs
 from infrastructure.db.session import SessionLocal
 
@@ -14,7 +14,7 @@ def main():
     with st.sidebar:
         st.header('Filters')
 
-        column_options = [x.name for x in get__all_accounts()]
+        column_options = [x.name for x in get_all_accounts()]
         selected_columns = st.multiselect('Selecionar contas:', column_options)
 
         view = st.radio('Selecionar visualização:', ["Monthly", "Weekly", "Daily"], index=1, horizontal = True, key = "sidebar")

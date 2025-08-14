@@ -50,10 +50,39 @@ def process_financial_data(file):
     df['Saldo (R$)'] = pd.to_numeric(df['Saldo (R$)'], errors='coerce').fillna(0)
     df['Crédito (R$)'] = pd.to_numeric(df['Crédito (R$)'], errors='coerce').fillna(0)
     df['Débito (R$)'] = pd.to_numeric(df['Débito (R$)'], errors='coerce').fillna(0)
-    df['Data'] = pd.to_datetime(df['Data'], format='%d/%m/%Y', errors='coerce')
+    df['Data'] = parse_brazilian_dates(df['Data'])
     df['Descrição'] = df['Descrição'].str.strip()
     df['Docto'] = df['Docto'].str.strip()
-    df['Situação'] = df['Situação'].str.strip()
+    df['Situação'] = df['Situação'].str.strip().fillna('')
     
     return df       
     
+def parse_brazilian_dates(s: pd.Series) -> pd.Series:
+    
+    s_clean = (
+        s.astype(str)
+         .str.replace(r'[\u200f\u200e\xa0]', '', regex=True)
+         .str.strip()
+    )
+  
+    try:
+        parsed_str = pd.to_datetime(s_clean, format='mixed', dayfirst=True, errors='coerce')
+    except TypeError:        
+        parsed_str = pd.to_datetime(s_clean, dayfirst=True, errors='coerce')
+
+    as_num = pd.to_numeric(s_clean, errors='coerce')
+    parsed_xl = pd.to_datetime(as_num, unit='D', origin='1899-12-30', errors='coerce')
+
+    out = parsed_str.fillna(parsed_xl)
+
+    return out    
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+        df = process_financial_data(file_path)
+        print(df.head(50))
+    else:
+        print("Please provide a file path as an argument.")

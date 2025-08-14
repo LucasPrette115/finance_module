@@ -1,7 +1,9 @@
 
+import pandas as pd
 from sqlalchemy import Column, String, Date, Numeric, ForeignKey, Text, DateTime, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from infrastructure.db.session import Base, SessionLocal
+from models.account import Account
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -20,6 +22,8 @@ class Transaction(Base):
 def map_financial_data_to_db(df, account_id):
     session = SessionLocal()
     try:
+        transactions = []       
+
         for _, row in df.iterrows():
             transaction = Transaction(
                 date=row['Data'],
@@ -28,10 +32,13 @@ def map_financial_data_to_db(df, account_id):
                 status=row['Situação'],
                 credit=row['Crédito (R$)'],
                 debit=row['Débito (R$)'],
-                account_id=account_id                     
+                account_id=account_id
             )
-            session.add(transaction)
-        session.commit() 
+            transactions.append(transaction)
+
+        session.add_all(transactions)
+        session.commit()
+        return True
     except Exception as e:
         print(f"Erro ao inserir dados: {e}")
         return False
@@ -41,6 +48,20 @@ def map_financial_data_to_db(df, account_id):
 def get_all_transactions():
     session = SessionLocal()
     try:
-        return session.query(Transaction).all()          
+        transactions = session.query(Transaction).all()  
+        accounts = {acc.id: acc.name for acc in session.query(Account).all()}    
+        data = [
+            {                
+                "Data": t.date,
+                "Descrição": t.description,
+                "Docto": t.document,
+                "Situação": t.status,
+                "Crédito (R$)": t.credit,
+                "Débito (R$)": t.debit,
+                "Conta": accounts[t.account_id]
+            }
+            for t in transactions
+        ]
+        return pd.DataFrame(data)
     finally:
-        session.close()  
+        session.close() 

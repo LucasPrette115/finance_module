@@ -1,5 +1,5 @@
 import streamlit as st
-from models.account import get__all_accounts
+from models.account import get_all_accounts
 from models.transaction import Transaction, get_all_transactions, map_financial_data_to_db
 from utils.process_file import process_financial_data
 from infrastructure.db.session import SessionLocal
@@ -7,7 +7,7 @@ from infrastructure.db.session import SessionLocal
 def show():    
         
             file = st.file_uploader("Selecione um arquivo")
-            accounts = get__all_accounts()
+            accounts = get_all_accounts()
                     
             account_options = {account.name: account.id for account in accounts}
                     
@@ -28,7 +28,7 @@ def show():
             
             # DataFrames
             # with st.expander('Raw Transactions Data'):
-            #     raw_transactions = query("raw_transactions")
+            #     raw_transactions = process_financial_data(file)
             #     st.dataframe(raw_transactions, height=400, use_container_width= True)
             with st.expander('Dados transformados'):
                 cleaned_transactions = get_all_transactions()

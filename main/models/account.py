@@ -12,9 +12,18 @@ class Account(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
     
-def get__all_accounts():
+def get_all_accounts():
     session = SessionLocal()
     try:
         return session.query(Account).all()          
+    finally:
+        session.close()
+        
+        
+def get_account_by_filter(filter_expr):
+    
+    session = SessionLocal()
+    try:
+        return session.query(Account).filter(filter_expr)
     finally:
         session.close()
