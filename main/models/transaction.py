@@ -14,6 +14,7 @@ class Transaction(Base):
     status = Column(String(50))
     credit = Column(Numeric(14,2), default=0)
     debit = Column(Numeric(14,2), default=0)
+    balance = Column(Numeric(14,2), default=0)
     account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False)    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -32,6 +33,7 @@ def map_financial_data_to_db(df, account_id):
                 status=row['Situação'],
                 credit=row['Crédito (R$)'],
                 debit=row['Débito (R$)'],
+                balance=row['Saldo (R$)'],
                 account_id=account_id
             )
             transactions.append(transaction)
@@ -57,7 +59,8 @@ def get_all_transactions():
                 "Docto": t.document,
                 "Situação": t.status,
                 "Crédito (R$)": t.credit,
-                "Débito (R$)": t.debit,
+                "Débito (R$)": -t.debit,
+                "Saldo (R$)": t.balance,
                 "Conta": accounts[t.account_id]
             }
             for t in transactions

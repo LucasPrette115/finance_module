@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     status VARCHAR(50),
     credit NUMERIC(14,2) DEFAULT 0 NOT NULL,
     debit  NUMERIC(14,2) DEFAULT 0 NOT NULL,
+    balance  NUMERIC(14,2) DEFAULT 0 NOT NULL,
     account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
