@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
 from models.transaction import get_all_transactions
+import plotly.express as px
+import altair as alt
 
 def show():
     df = load_data()
@@ -53,6 +55,38 @@ def show():
         delta_color="inverse" 
     )
     
+    st.subheader("Gráficos de Desempenho")
+    display_line_chart = (
+        monthly[['Mês_ts', 'total_net']]
+        .rename(columns={'Mês_ts': 'Período', 'total_net': 'Valor Líquido'})
+        .copy()
+    )
+    display_line_chart['Valor Líquido'] = (
+        display_line_chart['Valor Líquido']
+        .astype(float)        
+    )
+    
+    chart = alt.Chart(display_line_chart).mark_line(color="#2bff00").encode(
+        x='Período',
+        y='Valor Líquido'
+    )
+
+    st.altair_chart(chart, use_container_width=True, key='display_line_chart')
+    pie_data = pd.DataFrame({
+        "Tipo": ["Crédito", "Débito"],
+        "Valor": [current["total_credit"], current["total_debit"]]
+    })
+
+    fig_pie = px.pie(
+        pie_data,
+        names="Tipo",
+        values="Valor",
+        title="Crédito vs Débito (Mês Atual)",
+        color_discrete_sequence=["#00ff99", "#ff0000"] 
+    )
+    
+    st.plotly_chart(fig_pie, use_container_width=True)    
+    
     st.subheader("Evolução Mensal")
     display_df = monthly[['Mês_ts', 'total_credit', 'total_debit', 'total_net', 'Crescimento (%)']].copy()
     display_df.rename(columns={'Mês_ts': 'Mês', 'total_credit': 'Crédito', 'total_debit': 'Débito', 'total_net': 'Valor Líquido'}, inplace=True)
@@ -62,16 +96,16 @@ def show():
         'Crédito': 'R$ {:,.2f}',
         'Débito': 'R$ {:,.2f}',
         'Valor Líquido': 'R$ {:,.2f}',
-        'Crescimento (%)': '{:.2f}%'
-    }), height=300)
-
-
+        'Crescimento (%)': '{:.2f}%' 
+    }).apply(highlight_growth, subset=['Crescimento (%)']), height=300)
 
 def pct_change(curr, prev):
     if prev is None or prev == 0:
         return None
     return (curr - prev) / abs(prev) * 100
 
+def highlight_growth(s):
+    return ['color: green' if v > 0 else 'color: red' for v in s]
 
 @st.cache_data
 def load_data():
