@@ -47,11 +47,15 @@ def map_financial_data_to_db(df, account_id):
     finally:
         session.close()
 
-def get_all_transactions():
+def get_all_transactions(selected_accounts):
     session = SessionLocal()
     try:
         transactions = session.query(Transaction).all()  
-        accounts = {acc.id: acc.name for acc in session.query(Account).all()}    
+        accounts = {
+            acc.id: acc.name
+            for acc in session.query(Account)
+            .filter(Account.id.in_(selected_accounts))
+        } 
         data = [
             {                
                 "Data": t.date,

@@ -4,8 +4,8 @@ from models.transaction import get_all_transactions
 import plotly.express as px
 import altair as alt
 
-def show():
-    df = load_data()
+def show(selected_columns, view):
+    df = load_data(selected_columns)
     df['Data'] = pd.to_datetime(df['Data'])
     
     df['Mês'] = df['Data'].dt.to_period('M')
@@ -19,7 +19,7 @@ def show():
         tx_count=("Descrição", "count")
          ).reset_index().sort_values('Mês')
     
-    monthly['Crescimento (%)'] = (monthly['total_net'].pct_change()) * 100
+    monthly['Crescimento (%)'] = (monthly['total_net'].diff() / monthly['total_net'].abs().shift()) * 100
     monthly['Mês_ts'] = monthly['Mês'].dt.to_timestamp()
     
     current = monthly.iloc[-1]
@@ -82,7 +82,7 @@ def show():
         names="Tipo",
         values="Valor",
         title="Crédito vs Débito (Mês Atual)",
-        color_discrete_sequence=["#00ff99", "#ff0000"] 
+        color_discrete_sequence=["#2bff00", "#ff0000"] 
     )
     
     st.plotly_chart(fig_pie, use_container_width=True)    
@@ -108,5 +108,5 @@ def highlight_growth(s):
     return ['color: green' if v > 0 else 'color: red' for v in s]
 
 @st.cache_data
-def load_data():
-    return get_all_transactions()
+def load_data(selected_accounts):
+    return get_all_transactions(selected_accounts)

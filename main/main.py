@@ -9,23 +9,29 @@ def main():
                     layout='wide')
     
     st.title('Dashboard de controle Financeiro')
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(['Home', 'Dados', 'Dashboard', 'Contas', 'Documentação'])
+    tab1, tab2, tab3, tab5 = st.tabs(['Home', 'Dados', 'Contas', 'Documentação'])
 
     with st.sidebar:
         st.header('Filters')
 
-        column_options = [x.name for x in get_all_accounts()]
-        selected_columns = st.multiselect('Selecionar contas:', column_options)
+        column_options = {x.id: x.name for x in get_all_accounts()}      
+            
+        selected_names = st.multiselect("Selecionar contas:", column_options.values())
+        
+        if not selected_names and column_options:  
+            selected_names = [next(iter(column_options.values()))]
+ 
+        selected_columns = [id for id, name in column_options.items() if name in selected_names]
 
         view = st.radio('Selecionar visualização:', ["Monthly", "Weekly", "Daily"], index=1, horizontal = True, key = "sidebar")
 
     with tab1:
-        home.show()
+        home.show(selected_columns, view)
 
     with tab2:
-        dados.show()
+        dados.show(selected_columns, view)
 
-    with tab4:
+    with tab3:
         account.show()        
 
 
