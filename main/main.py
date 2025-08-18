@@ -1,6 +1,6 @@
 import streamlit as st
 from models.account import get_all_accounts
-from presentation import home, dados, account, dashboard, docs
+from presentation import home, dados, account, docs
 from infrastructure.db.session import SessionLocal
 
 def main():
@@ -23,7 +23,7 @@ def main():
  
         selected_columns = [id for id, name in column_options.items() if name in selected_names]
 
-        view = st.radio('Selecionar visualização:', ["Monthly", "Weekly", "Daily"], index=1, horizontal = True, key = "sidebar")
+        view = st.radio('Selecionar visualização:', ["Mensal", "Semanal", "Diário"], index=1, horizontal = True, key = "sidebar")
 
     with tab1:
         home.show(selected_columns, view)

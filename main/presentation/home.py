@@ -3,53 +3,59 @@ import streamlit as st
 from models.transaction import get_all_transactions
 import plotly.express as px
 import altair as alt
+import numpy as np
 
 def show(selected_columns, view):
     df = load_data(selected_columns)
     df['Data'] = pd.to_datetime(df['Data'])
     
-    df['Mês'] = df['Data'].dt.to_period('M')
+    if view == "Mensal":
+        df['Período'] = df['Data'].dt.to_period('M')
+    if view == "Semanal":
+        df['Período'] = df['Data'].dt.to_period('W')
+    if view == "Diário":
+        df['Período'] = df['Data'].dt.to_period('D')    
+   
     df['Valor Líquido'] = df['Crédito (R$)'] - df['Débito (R$)']    
     
-    monthly = df.groupby('Mês').agg(
-        month=('Mês', 'first'),
+    period_df = df.groupby('Período').agg(
+        month=('Período', 'first'),
         total_credit=('Crédito (R$)', 'sum'),
         total_debit=("Débito (R$)", "sum"),
         total_net=("Valor Líquido", "sum"),
         tx_count=("Descrição", "count")
-         ).reset_index().sort_values('Mês')
+         ).reset_index().sort_values('Período')
     
-    monthly['Crescimento (%)'] = (monthly['total_net'].diff() / monthly['total_net'].abs().shift()) * 100
-    monthly['Mês_ts'] = monthly['Mês'].dt.to_timestamp()
+    period_df['Crescimento (%)'] = (period_df['total_net'].diff() / period_df['total_net'].abs().shift().replace(0, np.nan)) * 100
+    period_df['Período_ts'] = period_df['Período'].dt.to_timestamp()
     
-    current = monthly.iloc[-1]
-    previous = monthly.iloc[-2] if len(monthly) >= 2 else None
+    current = period_df.iloc[-1]
+    previous = period_df.iloc[-2] if len(period_df) >= 2 else None
     
-    balance_delta = current['total_net'] - (previous['total_net'] if previous is not None else 0)
-    credit_delta = current['total_credit'] - (previous['total_credit'] if previous is not None else 0)
-    debit_delta = current['total_debit'] - (previous['total_debit'] if previous is not None else 0)
+    # balance_delta = current['total_net'] - (previous['total_net'] if previous is not None else 0)
+    # credit_delta = current['total_credit'] - (previous['total_credit'] if previous is not None else 0)
+    # debit_delta = current['total_debit'] - (previous['total_debit'] if previous is not None else 0)
     
     balance_delta_pct = pct_change(current['total_net'], previous['total_net']) if previous is not None else None
     credit_delta_pct = pct_change(current['total_credit'], previous['total_credit']) if previous is not None else None
-    debit_delta_pct = pct_change(current['total_debit'], previous['total_debit']) if previous is not None else None 
-    
+    debit_delta_pct = pct_change(current['total_debit'], previous['total_debit']) if previous is not None else None     
     
     col1, col2, col3 = st.columns(3)
 
     col1.metric(
-        "Saldo (mês)", 
+        "Saldo", 
         f"R$ {current['total_net']:,.2f}" if current['total_net'] is not None else "—",
         delta=f"{balance_delta_pct:.2f}%" if balance_delta_pct is not None else None
     )
 
     col2.metric(
-        "Créditos (mês)",
+        "Créditos",
         f"R$ {current['total_credit'] :,.2f}" if current['total_credit'] is not None else "—",
         delta=f"{credit_delta_pct:.2f}%" if credit_delta_pct is not None else None
     )
 
     col3.metric(
-        "Débitos (mês)",
+        "Débitos",
         f"R$ {current['total_debit']:,.2f}" if current['total_debit'] is not None else "—",
         delta=f"{debit_delta_pct:.2f}%" if debit_delta_pct is not None else None,
         delta_color="inverse" 
@@ -57,8 +63,8 @@ def show(selected_columns, view):
     
     st.subheader("Gráficos de Desempenho")
     display_line_chart = (
-        monthly[['Mês_ts', 'total_net']]
-        .rename(columns={'Mês_ts': 'Período', 'total_net': 'Valor Líquido'})
+        period_df[['Período_ts', 'total_net']]
+        .rename(columns={'Período_ts': 'Período', 'total_net': 'Valor Líquido'})
         .copy()
     )
     display_line_chart['Valor Líquido'] = (
@@ -81,16 +87,16 @@ def show(selected_columns, view):
         pie_data,
         names="Tipo",
         values="Valor",
-        title="Crédito vs Débito (Mês Atual)",
+        title="Crédito vs Débito",
         color_discrete_sequence=["#2bff00", "#ff0000"] 
     )
     
     st.plotly_chart(fig_pie, use_container_width=True)    
     
     st.subheader("Evolução Mensal")
-    display_df = monthly[['Mês_ts', 'total_credit', 'total_debit', 'total_net', 'Crescimento (%)']].copy()
-    display_df.rename(columns={'Mês_ts': 'Mês', 'total_credit': 'Crédito', 'total_debit': 'Débito', 'total_net': 'Valor Líquido'}, inplace=True)
-    display_df['Mês'] = display_df['Mês'].dt.strftime('%Y-%m')
+    display_df = period_df[['Período_ts', 'total_credit', 'total_debit', 'total_net', 'Crescimento (%)']].copy()
+    display_df.rename(columns={'Período_ts': 'Período', 'total_credit': 'Crédito', 'total_debit': 'Débito', 'total_net': 'Valor Líquido'}, inplace=True)
+    # display_df['Período'] = display_df['Período'].dt.strftime()
 
     st.dataframe(display_df.style.format({
         'Crédito': 'R$ {:,.2f}',
