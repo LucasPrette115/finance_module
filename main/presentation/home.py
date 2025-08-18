@@ -6,7 +6,7 @@ import altair as alt
 import numpy as np
 
 def show(selected_columns, view):
-    df = load_data(selected_columns)
+    df = get_all_transactions(selected_columns)
     df['Data'] = pd.to_datetime(df['Data'])
     
     if view == "Mensal":
@@ -30,11 +30,7 @@ def show(selected_columns, view):
     period_df['Período_ts'] = period_df['Período'].dt.to_timestamp()
     
     current = period_df.iloc[-1]
-    previous = period_df.iloc[-2] if len(period_df) >= 2 else None
-    
-    # balance_delta = current['total_net'] - (previous['total_net'] if previous is not None else 0)
-    # credit_delta = current['total_credit'] - (previous['total_credit'] if previous is not None else 0)
-    # debit_delta = current['total_debit'] - (previous['total_debit'] if previous is not None else 0)
+    previous = period_df.iloc[-2] if len(period_df) >= 2 else None 
     
     balance_delta_pct = pct_change(current['total_net'], previous['total_net']) if previous is not None else None
     credit_delta_pct = pct_change(current['total_credit'], previous['total_credit']) if previous is not None else None
@@ -113,6 +109,3 @@ def pct_change(curr, prev):
 def highlight_growth(s):
     return ['color: green' if v > 0 else 'color: red' for v in s]
 
-@st.cache_data
-def load_data(selected_accounts):
-    return get_all_transactions(selected_accounts)

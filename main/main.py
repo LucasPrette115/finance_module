@@ -16,14 +16,11 @@ def main():
 
         column_options = {x.id: x.name for x in get_all_accounts()}      
             
-        selected_names = st.multiselect("Selecionar contas:", column_options.values())
-        
-        if not selected_names and column_options:  
-            selected_names = [next(iter(column_options.values()))]
+        selected_names = st.multiselect("Selecionar contas:", column_options.values(), default=next(iter(column_options.values()))) 
  
         selected_columns = [id for id, name in column_options.items() if name in selected_names]
 
-        view = st.radio('Selecionar visualização:', ["Mensal", "Semanal", "Diário"], index=1, horizontal = True, key = "sidebar")
+        view = st.radio('Selecionar visualização:', ["Mensal", "Semanal", "Diário"], index=0, horizontal = True, key = "sidebar")
 
     with tab1:
         home.show(selected_columns, view)

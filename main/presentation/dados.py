@@ -29,6 +29,24 @@ def show(selected_columns, view):
             for period, df_month in monthly:                
                 with st.expander(f'{period}'):
                     st.dataframe(df_month, height=400, use_container_width=True)                   
+
+                    if st.button(f"Excluir registros de {period}", key=f"delete_{period}"):                    
+                        delete_transactions_by_month(period)
+                        st.rerun()
+                        st.dataframe(df_month, height=400, use_container_width=True) 
+                        st.success(f"Registros de {period} excluídos com sucesso!")                  
  
+def delete_transactions_by_month(period):
+    session = SessionLocal()
+    try:        
+        start = period.start_time
+        end = period.end_time
+        session.query(Transaction).filter(
+            Transaction.date >= start,
+            Transaction.date <= end
+        ).delete()
+        session.commit()
+    finally:
+        session.close()
    
        
