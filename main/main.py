@@ -9,7 +9,7 @@ def main():
                     layout='wide')
     
     st.title('Dashboard de controle Financeiro')
-    tab1, tab2, tab3, tab5 = st.tabs(['Home', 'Dados', 'Contas', 'Documentação'])
+    tab1, tab2, tab3 = st.tabs(['Home', 'Dados', 'Contas'])
 
     with st.sidebar:
         st.header('Filters')
